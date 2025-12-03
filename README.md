@@ -14,12 +14,29 @@ A hyper-casual reaction game where you must tap only when you see 6 or 7!
 
 ## ✨ Features
 
-- 🎵 Synthesized sound effects (no external audio files)
+### Core Gameplay
+- 🎵 Synthesized sound effects (toggleable, no external audio files)
 - 📳 Haptic feedback on mobile devices
 - 🔥 Combo system with multipliers (up to 5x)
 - 📈 Progressive difficulty (speed increases, more distractors)
 - 💾 Local high score persistence
-- 🎨 Neon-styled UI with animations
+- 🎨 Multiple visual themes (Neon, Sunset, Ocean, Forest)
+
+### Game Modes
+- ⏱ **Timed Mode**: Classic 30-second challenge
+- ♾️ **Practice Mode**: Endless gameplay with no time limit
+
+### Difficulty Levels
+- ⭐ **Easy**: Slower pace (1200-500ms), more targets (60-45%)
+- ⭐⭐ **Medium**: Balanced challenge (1000-350ms), moderate targets (50-30%)
+- ⭐⭐⭐ **Hard**: Fast pace (800-250ms), fewer targets (40-20%)
+
+### Quality of Life
+- ⏸ **Pause/Resume**: Take a break anytime during gameplay
+- 🎓 **Tutorial**: Interactive how-to-play guide
+- ⚙️ **Settings**: Customize difficulty, sound, and themes
+- 📊 **Game History**: Track your last 20 games locally
+- 🎯 **Adaptive UI**: Shows current difficulty and mode during play
 
 ## 🚀 Run Locally
 
@@ -64,10 +81,36 @@ src/
 ## 🎮 Game Mechanics
 
 - **Scoring:** 100 points per correct tap, with combo multipliers
-- **Combos:** Every 5 consecutive hits increases your multiplier
+- **Combos:** Every 5 consecutive hits increases your multiplier (up to 5x)
 - **Penalties:** -50 points for wrong taps, combo reset
-- **Difficulty:** Speed increases from 1000ms to 350ms intervals
-- **Target Rate:** Starts at 50%, decreases to 30% over time
+- **Difficulty:** Dynamic speed based on difficulty level
+  - Easy: 1200ms → 500ms
+  - Medium: 1000ms → 350ms
+  - Hard: 800ms → 250ms
+- **Target Rate:** Progressively decreases based on difficulty
+  - Easy: 60% → 45%
+  - Medium: 50% → 30%
+  - Hard: 40% → 20%
+
+## 🎨 Customization
+
+### Themes
+Switch between four beautiful color themes:
+- **Neon** (Default): Cyan, magenta, and yellow
+- **Sunset**: Orange, pink, and purple gradients
+- **Ocean**: Blue and teal hues
+- **Forest**: Green and emerald tones
+
+### Sound
+Toggle sound effects on/off in settings to play with or without audio feedback.
+
+## 📊 Statistics
+
+The game automatically tracks:
+- High scores (for timed mode)
+- Last 20 game sessions with full statistics
+- Total games played
+- Difficulty and mode for each session
 
 ## 📝 License
 

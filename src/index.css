@@ -12,3 +12,48 @@ body {
 .game-font {
   font-family: 'Black Ops One', system-ui;
 }
+
+/* Theme Support */
+[data-theme="NEON"] {
+  --theme-primary: #00ffff;
+  --theme-secondary: #ff00ff;
+  --theme-accent: #ffff00;
+}
+
+[data-theme="SUNSET"] {
+  --theme-primary: #ff6b35;
+  --theme-secondary: #f72585;
+  --theme-accent: #7209b7;
+}
+
+[data-theme="OCEAN"] {
+  --theme-primary: #4cc9f0;
+  --theme-secondary: #4895ef;
+  --theme-accent: #4361ee;
+}
+
+[data-theme="FOREST"] {
+  --theme-primary: #52b788;
+  --theme-secondary: #40916c;
+  --theme-accent: #95d5b2;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.3s;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-pop {
+  animation: pop 0.3s ease-out;
+}

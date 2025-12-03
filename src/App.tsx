@@ -2,37 +2,35 @@ import React, { useState } from 'react';
 import Game from './components/Game';
 import Menu from './components/Menu';
 import Results from './components/Results';
-import { GameState, GameStats } from './types';
+import Settings from './components/Settings';
+import Tutorial from './components/Tutorial';
+import { GameState, GameStats, GameSettings } from './types';
+import { getSettings, saveSettings, getHighScore, saveHighScore, addGameToHistory } from './utils/storage';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(GameState.MENU);
   const [lastStats, setLastStats] = useState<GameStats | null>(null);
-  
-  // Initialize high score from localStorage
-  const [highScore, setHighScore] = useState(() => {
-    try {
-      const savedScore = localStorage.getItem('6-7-tap-highscore');
-      return savedScore ? parseInt(savedScore, 10) : 0;
-    } catch {
-      console.warn('Failed to load high score');
-      return 0;
-    }
-  });
+  const [gameMode, setGameMode] = useState<'timed' | 'practice'>('timed');
+  const [settings, setSettings] = useState<GameSettings>(getSettings());
+  const [highScore, setHighScore] = useState(getHighScore());
 
-  const startGame = () => {
+  const startGame = (mode: 'timed' | 'practice') => {
+    setGameMode(mode);
     setGameState(GameState.PLAYING);
   };
 
   const endGame = (stats: GameStats) => {
     setLastStats(stats);
-    if (stats.score > highScore) {
+
+    // Only update high score for timed mode on medium difficulty
+    if (stats.mode === 'timed' && stats.score > highScore) {
       setHighScore(stats.score);
-      try {
-        localStorage.setItem('6-7-tap-highscore', stats.score.toString());
-      } catch {
-        console.warn('Failed to save high score');
-      }
+      saveHighScore(stats.score);
     }
+
+    // Save to history
+    addGameToHistory(stats);
+
     setGameState(GameState.GAME_OVER);
   };
 
@@ -44,20 +42,55 @@ const App: React.FC = () => {
     setGameState(GameState.PLAYING);
   };
 
+  const openSettings = () => {
+    setGameState(GameState.SETTINGS);
+  };
+
+  const openTutorial = () => {
+    setGameState(GameState.TUTORIAL);
+  };
+
+  const updateSettings = (newSettings: GameSettings) => {
+    setSettings(newSettings);
+    saveSettings(newSettings);
+  };
+
   return (
-    <div className="h-screen w-screen overflow-hidden bg-black">
+    <div className="h-screen w-screen overflow-hidden bg-black" data-theme={settings.theme}>
       {gameState === GameState.MENU && (
-        <Menu onStart={startGame} highScore={highScore} />
+        <Menu
+          onStart={startGame}
+          onSettings={openSettings}
+          onTutorial={openTutorial}
+          highScore={highScore}
+          difficulty={settings.difficulty}
+          soundEnabled={settings.soundEnabled}
+        />
       )}
       {gameState === GameState.PLAYING && (
-        <Game onGameOver={endGame} />
+        <Game
+          onGameOver={endGame}
+          difficulty={settings.difficulty}
+          mode={gameMode}
+          soundEnabled={settings.soundEnabled}
+        />
       )}
       {gameState === GameState.GAME_OVER && lastStats && (
-        <Results 
-          stats={lastStats} 
-          onRestart={restartGame} 
-          onHome={goHome} 
+        <Results
+          stats={lastStats}
+          onRestart={restartGame}
+          onHome={goHome}
         />
+      )}
+      {gameState === GameState.SETTINGS && (
+        <Settings
+          settings={settings}
+          onUpdateSettings={updateSettings}
+          onBack={goHome}
+        />
+      )}
+      {gameState === GameState.TUTORIAL && (
+        <Tutorial onClose={goHome} />
       )}
     </div>
   );

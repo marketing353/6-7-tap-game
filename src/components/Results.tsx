@@ -14,8 +14,10 @@ const Results: React.FC<ResultsProps> = ({ stats, onRestart, onHome }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    playSound('gameover');
-    
+    if (stats.mode === 'timed') {
+      playSound('gameover');
+    }
+
     const fetchFeedback = async () => {
       const data = await generateGameFeedback(stats);
       setCommentary(data);
@@ -30,8 +32,12 @@ const Results: React.FC<ResultsProps> = ({ stats, onRestart, onHome }) => {
       <div className="w-full max-w-md space-y-8 animate-pop">
         
         <div className="text-center space-y-2">
-          <h2 className="text-5xl font-black game-font text-white">GAME OVER</h2>
-          <p className="text-gray-400 uppercase tracking-widest">Time's Up</p>
+          <h2 className="text-5xl font-black game-font text-white">
+            {stats.mode === 'timed' ? 'GAME OVER' : 'SESSION END'}
+          </h2>
+          <p className="text-gray-400 uppercase tracking-widest">
+            {stats.difficulty} • {stats.mode === 'timed' ? "Time's Up" : 'Practice Session'}
+          </p>
         </div>
 
         {/* Score Card */}

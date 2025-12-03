@@ -1,15 +1,20 @@
 import React from 'react';
 import { playSound } from '../utils/sound';
+import { Difficulty } from '../types';
 
 interface MenuProps {
-  onStart: () => void;
+  onStart: (mode: 'timed' | 'practice') => void;
+  onSettings: () => void;
+  onTutorial: () => void;
   highScore: number;
+  difficulty: Difficulty;
+  soundEnabled: boolean;
 }
 
-const Menu: React.FC<MenuProps> = ({ onStart, highScore }) => {
-  const handleStart = () => {
-    playSound('start');
-    onStart();
+const Menu: React.FC<MenuProps> = ({ onStart, onSettings, onTutorial, highScore, difficulty, soundEnabled }) => {
+  const handleStart = (mode: 'timed' | 'practice') => {
+    if (soundEnabled) playSound('start');
+    onStart(mode);
   };
 
   return (
@@ -30,20 +35,47 @@ const Menu: React.FC<MenuProps> = ({ onStart, highScore }) => {
           </p>
         </div>
 
-        <div className="py-4">
+        <div className="py-4 space-y-3">
           <div className="inline-block px-6 py-3 border-2 border-gray-800 rounded-xl bg-gray-900/50 backdrop-blur-sm">
             <p className="text-gray-400 text-sm uppercase tracking-wider">High Score</p>
             <p className="text-3xl font-bold text-white">{highScore.toLocaleString()}</p>
           </div>
+          <div className="text-xs text-gray-500">
+            Current: <span className="text-neon-cyan">{difficulty}</span> • Sound {soundEnabled ? '🔊' : '🔇'}
+          </div>
         </div>
 
-        <button
-          onClick={handleStart}
-          className="group relative px-10 py-5 bg-white text-black font-black text-2xl md:text-3xl rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.6)]"
-        >
-          <span className="relative z-10">PLAY NOW</span>
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-neon-pink to-neon-cyan opacity-0 group-hover:opacity-100 transition-opacity duration-200 blur-md -z-10"></div>
-        </button>
+        <div className="space-y-3 w-full max-w-sm">
+          <button
+            onClick={() => handleStart('timed')}
+            className="group relative w-full px-10 py-5 bg-white text-black font-black text-2xl md:text-3xl rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.6)]"
+          >
+            <span className="relative z-10">⏱ PLAY (30s)</span>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-neon-pink to-neon-cyan opacity-0 group-hover:opacity-100 transition-opacity duration-200 blur-md -z-10"></div>
+          </button>
+
+          <button
+            onClick={() => handleStart('practice')}
+            className="w-full px-8 py-4 bg-neon-cyan/20 border-2 border-neon-cyan text-neon-cyan font-bold text-lg rounded-full transition-all duration-200 hover:bg-neon-cyan/30 hover:scale-105 active:scale-95"
+          >
+            ♾️ PRACTICE MODE
+          </button>
+
+          <div className="flex gap-2">
+            <button
+              onClick={onTutorial}
+              className="flex-1 px-6 py-3 bg-gray-800 border border-gray-700 text-gray-300 font-bold rounded-xl transition-colors hover:bg-gray-700"
+            >
+              📖 TUTORIAL
+            </button>
+            <button
+              onClick={onSettings}
+              className="flex-1 px-6 py-3 bg-gray-800 border border-gray-700 text-gray-300 font-bold rounded-xl transition-colors hover:bg-gray-700"
+            >
+              ⚙️ SETTINGS
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="absolute bottom-6 text-gray-600 text-xs text-center max-w-md">
