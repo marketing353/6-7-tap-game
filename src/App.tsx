@@ -7,10 +7,12 @@ import Tutorial from './components/Tutorial';
 import Achievements from './components/Achievements';
 import Stats from './components/Stats';
 import Shop from './components/Shop';
+import DailySpin from './components/DailySpin';
 import AchievementNotification from './components/AchievementNotification';
 import { GameState, GameStats, GameSettings, Achievement, PlayerProgress } from './types';
 import { getSettings, saveSettings, getHighScore, saveHighScore, addGameToHistory } from './utils/storage';
 import { getPlayerProgress, updateProgressWithGameStats } from './utils/achievements';
+import { canSpinToday } from './utils/dailySpin';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(GameState.MENU);
@@ -23,6 +25,7 @@ const App: React.FC = () => {
   const [goldenNumbersCollected, setGoldenNumbersCollected] = useState(0);
   const [powerUpsCollected, setPowerUpsCollected] = useState(0);
   const [coinsEarned, setCoinsEarned] = useState(0);
+  const [showDailySpin, setShowDailySpin] = useState(false);
 
   const startGame = (mode: 'timed' | 'practice') => {
     setGameMode(mode);
@@ -62,6 +65,14 @@ const App: React.FC = () => {
 
   const goHome = () => {
     setGameState(GameState.MENU);
+    // Check if daily spin is available
+    if (canSpinToday(playerProgress.lastSpinDate)) {
+      setTimeout(() => setShowDailySpin(true), 500); // Small delay for smooth transition
+    }
+  };
+
+  const closeDailySpin = () => {
+    setShowDailySpin(false);
   };
 
   const restartGame = () => {
@@ -177,6 +188,15 @@ const App: React.FC = () => {
         <AchievementNotification
           achievement={newAchievements[0]}
           onClose={dismissAchievement}
+        />
+      )}
+
+      {/* Daily Spin */}
+      {showDailySpin && gameState === GameState.MENU && (
+        <DailySpin
+          progress={playerProgress}
+          onUpdateProgress={updatePlayerProgress}
+          onClose={closeDailySpin}
         />
       )}
     </div>
