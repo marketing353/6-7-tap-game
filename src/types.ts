@@ -3,7 +3,9 @@ export enum GameState {
   PLAYING = 'PLAYING',
   GAME_OVER = 'GAME_OVER',
   SETTINGS = 'SETTINGS',
-  TUTORIAL = 'TUTORIAL'
+  TUTORIAL = 'TUTORIAL',
+  ACHIEVEMENTS = 'ACHIEVEMENTS',
+  STATS = 'STATS'
 }
 
 export enum Difficulty {
@@ -50,4 +52,40 @@ export interface GameSettings {
 export interface GameHistory {
   games: GameStats[];
   totalGamesPlayed: number;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  unlockedAt?: number;
+  progress?: number;
+  maxProgress?: number;
+}
+
+export interface PlayerProgress {
+  achievements: Achievement[];
+  dailyStreak: number;
+  lastPlayedDate: string;
+  totalScore: number;
+  totalGamesPlayed: number;
+  totalHits: number;
+  bestCombo: number;
+  bestScore: number;
+  powerUpsCollected: number;
+  goldenNumbersHit: number;
+}
+
+export interface PowerUp {
+  type: 'double-points' | 'slow-time' | 'shield' | 'multiplier';
+  duration: number;
+  startTime: number;
+}
+
+export interface SpecialNumber extends NumberItem {
+  isGolden?: boolean;
+  isPowerUp?: boolean;
+  powerUpType?: PowerUp['type'];
 }
