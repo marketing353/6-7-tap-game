@@ -4,8 +4,12 @@ import Menu from './components/Menu';
 import Results from './components/Results';
 import Settings from './components/Settings';
 import Tutorial from './components/Tutorial';
-import { GameState, GameStats, GameSettings } from './types';
+import Achievements from './components/Achievements';
+import Stats from './components/Stats';
+import AchievementNotification from './components/AchievementNotification';
+import { GameState, GameStats, GameSettings, Achievement, PlayerProgress } from './types';
 import { getSettings, saveSettings, getHighScore, saveHighScore, addGameToHistory } from './utils/storage';
+import { getPlayerProgress, updateProgressWithGameStats } from './utils/achievements';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(GameState.MENU);
@@ -13,13 +17,19 @@ const App: React.FC = () => {
   const [gameMode, setGameMode] = useState<'timed' | 'practice'>('timed');
   const [settings, setSettings] = useState<GameSettings>(getSettings());
   const [highScore, setHighScore] = useState(getHighScore());
+  const [playerProgress, setPlayerProgress] = useState<PlayerProgress>(getPlayerProgress());
+  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  const [goldenNumbersCollected, setGoldenNumbersCollected] = useState(0);
+  const [powerUpsCollected, setPowerUpsCollected] = useState(0);
 
   const startGame = (mode: 'timed' | 'practice') => {
     setGameMode(mode);
     setGameState(GameState.PLAYING);
+    setGoldenNumbersCollected(0);
+    setPowerUpsCollected(0);
   };
 
-  const endGame = (stats: GameStats) => {
+  const endGame = (stats: GameStats, goldenNumbers: number = 0, powerUps: number = 0) => {
     setLastStats(stats);
 
     // Only update high score for timed mode on medium difficulty
@@ -30,6 +40,19 @@ const App: React.FC = () => {
 
     // Save to history
     addGameToHistory(stats);
+
+    // Update progress and check for achievements
+    const { progress, newAchievements: unlockedAchievements } = updateProgressWithGameStats(
+      stats,
+      goldenNumbers,
+      powerUps
+    );
+    setPlayerProgress(progress);
+
+    // Show achievement notifications
+    if (unlockedAchievements.length > 0) {
+      setNewAchievements(unlockedAchievements);
+    }
 
     setGameState(GameState.GAME_OVER);
   };
@@ -50,9 +73,34 @@ const App: React.FC = () => {
     setGameState(GameState.TUTORIAL);
   };
 
+  const openAchievements = () => {
+    setGameState(GameState.ACHIEVEMENTS);
+  };
+
+  const openStats = () => {
+    setGameState(GameState.STATS);
+  };
+
   const updateSettings = (newSettings: GameSettings) => {
     setSettings(newSettings);
     saveSettings(newSettings);
+  };
+
+  const dismissAchievement = () => {
+    setNewAchievements((prev) => prev.slice(1));
+  };
+
+  // Update game callbacks
+  const handleGameOver = (stats: GameStats) => {
+    endGame(stats, goldenNumbersCollected, powerUpsCollected);
+  };
+
+  const onGoldenNumberCollected = () => {
+    setGoldenNumbersCollected((prev) => prev + 1);
+  };
+
+  const onPowerUpCollected = () => {
+    setPowerUpsCollected((prev) => prev + 1);
   };
 
   return (
@@ -62,17 +110,22 @@ const App: React.FC = () => {
           onStart={startGame}
           onSettings={openSettings}
           onTutorial={openTutorial}
+          onAchievements={openAchievements}
+          onStats={openStats}
           highScore={highScore}
           difficulty={settings.difficulty}
           soundEnabled={settings.soundEnabled}
+          playerProgress={playerProgress}
         />
       )}
       {gameState === GameState.PLAYING && (
         <Game
-          onGameOver={endGame}
+          onGameOver={handleGameOver}
           difficulty={settings.difficulty}
           mode={gameMode}
           soundEnabled={settings.soundEnabled}
+          onGoldenNumberCollected={onGoldenNumberCollected}
+          onPowerUpCollected={onPowerUpCollected}
         />
       )}
       {gameState === GameState.GAME_OVER && lastStats && (
@@ -91,6 +144,20 @@ const App: React.FC = () => {
       )}
       {gameState === GameState.TUTORIAL && (
         <Tutorial onClose={goHome} />
+      )}
+      {gameState === GameState.ACHIEVEMENTS && (
+        <Achievements progress={playerProgress} onClose={goHome} />
+      )}
+      {gameState === GameState.STATS && (
+        <Stats progress={playerProgress} onClose={goHome} />
+      )}
+
+      {/* Achievement Notifications */}
+      {newAchievements.length > 0 && (
+        <AchievementNotification
+          achievement={newAchievements[0]}
+          onClose={dismissAchievement}
+        />
       )}
     </div>
   );

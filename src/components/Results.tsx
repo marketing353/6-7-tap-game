@@ -12,6 +12,7 @@ interface ResultsProps {
 const Results: React.FC<ResultsProps> = ({ stats, onRestart, onHome }) => {
   const [commentary, setCommentary] = useState<AICommentary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shareMessage, setShareMessage] = useState<string>('');
 
   useEffect(() => {
     if (stats.mode === 'timed') {
@@ -26,6 +27,32 @@ const Results: React.FC<ResultsProps> = ({ stats, onRestart, onHome }) => {
 
     fetchFeedback();
   }, [stats]);
+
+  const handleShare = async () => {
+    const text = `🎮 6-7 TAP Game!\n\n🏆 Score: ${stats.score.toLocaleString()}\n🔥 Max Combo: ${stats.maxCombo}x\n🎯 Accuracy: ${Math.round(stats.accuracy * 100)}%\n⚡ Mode: ${stats.mode.toUpperCase()}\n💪 Difficulty: ${stats.difficulty}\n\nCan you beat my score?`;
+
+    // Try native share API first
+    if (navigator.share) {
+      try {
+        await navigator.share({ text });
+        setShareMessage('Shared!');
+        setTimeout(() => setShareMessage(''), 2000);
+        return;
+      } catch (err) {
+        // User cancelled or share failed, fall through to clipboard
+      }
+    }
+
+    // Fallback to clipboard
+    try {
+      await navigator.clipboard.writeText(text);
+      setShareMessage('Copied to clipboard!');
+      setTimeout(() => setShareMessage(''), 2000);
+    } catch (err) {
+      setShareMessage('Failed to copy');
+      setTimeout(() => setShareMessage(''), 2000);
+    }
+  };
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-dark-bg p-6 text-white overflow-y-auto">
@@ -90,14 +117,29 @@ const Results: React.FC<ResultsProps> = ({ stats, onRestart, onHome }) => {
             )}
         </div>
 
+        {/* Share Button */}
+        <div className="relative">
+          <button
+            onClick={handleShare}
+            className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-neon-pink to-neon-cyan text-white hover:opacity-80 transition-opacity"
+          >
+            📤 SHARE SCORE
+          </button>
+          {shareMessage && (
+            <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap animate-pop">
+              {shareMessage}
+            </div>
+          )}
+        </div>
+
         <div className="flex gap-4 w-full">
-            <button 
+            <button
                 onClick={onHome}
                 className="flex-1 py-4 rounded-xl font-bold bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
             >
                 MENU
             </button>
-            <button 
+            <button
                 onClick={onRestart}
                 className="flex-1 py-4 rounded-xl font-bold bg-white text-black hover:bg-gray-200 transition-colors shadow-lg shadow-white/10"
             >

@@ -1,21 +1,37 @@
 import React from 'react';
 import { playSound } from '../utils/sound';
-import { Difficulty } from '../types';
+import { Difficulty, PlayerProgress } from '../types';
 
 interface MenuProps {
   onStart: (mode: 'timed' | 'practice') => void;
   onSettings: () => void;
   onTutorial: () => void;
+  onAchievements: () => void;
+  onStats: () => void;
   highScore: number;
   difficulty: Difficulty;
   soundEnabled: boolean;
+  playerProgress: PlayerProgress;
 }
 
-const Menu: React.FC<MenuProps> = ({ onStart, onSettings, onTutorial, highScore, difficulty, soundEnabled }) => {
+const Menu: React.FC<MenuProps> = ({
+  onStart,
+  onSettings,
+  onTutorial,
+  onAchievements,
+  onStats,
+  highScore,
+  difficulty,
+  soundEnabled,
+  playerProgress
+}) => {
   const handleStart = (mode: 'timed' | 'practice') => {
     if (soundEnabled) playSound('start');
     onStart(mode);
   };
+
+  const unlockedAchievements = playerProgress.achievements.filter(a => a.unlocked).length;
+  const totalAchievements = playerProgress.achievements.length;
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-dark-bg text-white p-6 relative overflow-hidden">
@@ -36,12 +52,20 @@ const Menu: React.FC<MenuProps> = ({ onStart, onSettings, onTutorial, highScore,
         </div>
 
         <div className="py-4 space-y-3">
-          <div className="inline-block px-6 py-3 border-2 border-gray-800 rounded-xl bg-gray-900/50 backdrop-blur-sm">
-            <p className="text-gray-400 text-sm uppercase tracking-wider">High Score</p>
-            <p className="text-3xl font-bold text-white">{highScore.toLocaleString()}</p>
+          <div className="flex gap-3">
+            <div className="flex-1 px-4 py-3 border-2 border-gray-800 rounded-xl bg-gray-900/50 backdrop-blur-sm">
+              <p className="text-gray-400 text-xs uppercase tracking-wider">High Score</p>
+              <p className="text-2xl font-bold text-white">{highScore.toLocaleString()}</p>
+            </div>
+            <div className="flex-1 px-4 py-3 border-2 border-gray-800 rounded-xl bg-gray-900/50 backdrop-blur-sm">
+              <p className="text-gray-400 text-xs uppercase tracking-wider">Streak</p>
+              <p className="text-2xl font-bold text-neon-pink">{playerProgress.dailyStreak} 🔥</p>
+            </div>
           </div>
           <div className="text-xs text-gray-500">
             Current: <span className="text-neon-cyan">{difficulty}</span> • Sound {soundEnabled ? '🔊' : '🔇'}
+            <br />
+            Achievements: <span className="text-neon-yellow">{unlockedAchievements}/{totalAchievements}</span>
           </div>
         </div>
 
@@ -60,6 +84,21 @@ const Menu: React.FC<MenuProps> = ({ onStart, onSettings, onTutorial, highScore,
           >
             ♾️ PRACTICE MODE
           </button>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={onAchievements}
+              className="px-4 py-3 bg-gradient-to-r from-neon-pink/20 to-neon-cyan/20 border border-neon-cyan text-white font-bold rounded-xl transition-all hover:from-neon-pink/30 hover:to-neon-cyan/30"
+            >
+              🏆 ACHIEVEMENTS
+            </button>
+            <button
+              onClick={onStats}
+              className="px-4 py-3 bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500 text-white font-bold rounded-xl transition-all hover:from-purple-900/40 hover:to-blue-900/40"
+            >
+              📊 STATS
+            </button>
+          </div>
 
           <div className="flex gap-2">
             <button

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GameStats, NumberItem, Difficulty } from '../types';
+import { GameStats, Difficulty, PowerUp, SpecialNumber } from '../types';
 import { playSound } from '../utils/sound';
 
 interface GameProps {
@@ -7,6 +7,8 @@ interface GameProps {
   difficulty: Difficulty;
   mode: 'timed' | 'practice';
   soundEnabled: boolean;
+  onGoldenNumberCollected: () => void;
+  onPowerUpCollected: () => void;
 }
 
 const GAME_DURATION = 30; // seconds
@@ -35,15 +37,23 @@ const DIFFICULTY_CONFIG = {
   }
 };
 
-const Game: React.FC<GameProps> = ({ onGameOver, difficulty, mode, soundEnabled }) => {
+const Game: React.FC<GameProps> = ({
+  onGameOver,
+  difficulty,
+  mode,
+  soundEnabled,
+  onGoldenNumberCollected,
+  onPowerUpCollected
+}) => {
   const config = DIFFICULTY_CONFIG[difficulty];
   const [timeLeft, setTimeLeft] = useState(mode === 'timed' ? GAME_DURATION : 0);
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
-  const [currentNumber, setCurrentNumber] = useState<NumberItem | null>(null);
+  const [currentNumber, setCurrentNumber] = useState<SpecialNumber | null>(null);
   const [feedback, setFeedback] = useState<{ text: string; color: string; id: number } | null>(null);
   const [isShake, setIsShake] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [activePowerUp, setActivePowerUp] = useState<PowerUp | null>(null);
 
   // Refs for mutable state inside interval/timeouts to avoid closure staleness
   const gameStateRef = useRef({
@@ -59,14 +69,27 @@ const Game: React.FC<GameProps> = ({ onGameOver, difficulty, mode, soundEnabled 
   });
 
   // Generate a random number with dynamic probability
-  const generateNumber = useCallback(() => {
+  const generateNumber = useCallback((): SpecialNumber => {
     const state = gameStateRef.current;
     const isTarget = Math.random() < state.targetProbability;
-    
+
     let val: number;
-    
+    let isGolden = false;
+    let isPowerUp = false;
+    let powerUpType: PowerUp['type'] | undefined;
+
     if (isTarget) {
       val = Math.random() < 0.5 ? 6 : 7;
+      // 10% chance for golden number (extra points)
+      if (Math.random() < 0.1) {
+        isGolden = true;
+      }
+      // 5% chance for power-up instead
+      if (!isGolden && Math.random() < 0.05) {
+        isPowerUp = true;
+        const powerUps: PowerUp['type'][] = ['double-points', 'slow-time', 'shield', 'multiplier'];
+        powerUpType = powerUps[Math.floor(Math.random() * powerUps.length)];
+      }
     } else {
       // Generate non-6/7 number (0-9)
       do {
@@ -77,7 +100,10 @@ const Game: React.FC<GameProps> = ({ onGameOver, difficulty, mode, soundEnabled 
     return {
       value: val,
       id: Date.now(),
-      isTarget
+      isTarget,
+      isGolden,
+      isPowerUp,
+      powerUpType
     };
   }, []);
 
@@ -107,7 +133,42 @@ const Game: React.FC<GameProps> = ({ onGameOver, difficulty, mode, soundEnabled 
       }
 
       const comboMultiplier = Math.min(Math.floor(state.combo / 5) + 1, 5); // Cap multiplier at 5x
-      const points = 100 * comboMultiplier;
+      let points = 100 * comboMultiplier;
+
+      // Golden number bonus
+      if (currentNumber.isGolden) {
+        points *= 3; // Triple points!
+        triggerFeedback('✨ GOLDEN! x3 ✨', 'text-yellow-400');
+        onGoldenNumberCollected();
+      } else if (currentNumber.isPowerUp && currentNumber.powerUpType) {
+        // Activate power-up
+        const powerUp: PowerUp = {
+          type: currentNumber.powerUpType,
+          duration: 5000, // 5 seconds
+          startTime: Date.now()
+        };
+        setActivePowerUp(powerUp);
+        onPowerUpCollected();
+
+        const powerUpNames = {
+          'double-points': '⚡ DOUBLE POINTS!',
+          'slow-time': '🕐 SLOW TIME!',
+          'shield': '🛡️ SHIELD!',
+          'multiplier': '✨ 5X MULTIPLIER!'
+        };
+        triggerFeedback(powerUpNames[powerUp.type], 'text-purple-400');
+      } else {
+        triggerFeedback(state.combo > 1 ? `${state.combo}x COMBO!` : 'PERFECT!', 'text-neon-yellow');
+      }
+
+      // Apply active power-up effects
+      if (activePowerUp) {
+        if (activePowerUp.type === 'double-points') {
+          points *= 2;
+        } else if (activePowerUp.type === 'multiplier') {
+          points *= 5;
+        }
+      }
 
       state.score += points;
       state.combo += 1;
@@ -116,13 +177,19 @@ const Game: React.FC<GameProps> = ({ onGameOver, difficulty, mode, soundEnabled 
 
       setScore(state.score);
       setCombo(state.combo);
-      triggerFeedback(state.combo > 1 ? `${state.combo}x COMBO!` : 'PERFECT!', 'text-neon-yellow');
 
       // Speed up slightly on hit (rewarding speed)
       state.intervalMs = Math.max(config.minInterval, state.intervalMs - 15);
 
     } else {
       // MISS (Tapped wrong number)
+      // Check if shield is active
+      if (activePowerUp?.type === 'shield') {
+        triggerFeedback('🛡️ PROTECTED!', 'text-blue-400');
+        setActivePowerUp(null); // Consume shield
+        return;
+      }
+
       if (soundEnabled) playSound('miss');
 
       // Haptic feedback: Short, sharp vibration for miss
@@ -141,6 +208,23 @@ const Game: React.FC<GameProps> = ({ onGameOver, difficulty, mode, soundEnabled 
       triggerFeedback('OOPS!', 'text-red-500');
     }
   };
+
+  // Power-up expiration
+  useEffect(() => {
+    if (!activePowerUp) return;
+
+    const timeRemaining = activePowerUp.duration - (Date.now() - activePowerUp.startTime);
+    if (timeRemaining <= 0) {
+      setActivePowerUp(null);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setActivePowerUp(null);
+    }, timeRemaining);
+
+    return () => clearTimeout(timer);
+  }, [activePowerUp]);
 
   // Game Loop
   useEffect(() => {
@@ -238,6 +322,15 @@ const Game: React.FC<GameProps> = ({ onGameOver, difficulty, mode, soundEnabled 
           <span className="text-gray-400 text-sm font-bold tracking-widest">SCORE</span>
           <span className="text-3xl text-white font-black game-font">{score.toLocaleString()}</span>
           <span className="text-xs text-gray-600 mt-1">{difficulty}</span>
+          {/* Active Power-Up Indicator */}
+          {activePowerUp && (
+            <div className="mt-2 px-2 py-1 bg-purple-600 rounded text-xs font-bold animate-pulse">
+              {activePowerUp.type === 'double-points' && '⚡ 2X'}
+              {activePowerUp.type === 'slow-time' && '🕐 SLOW'}
+              {activePowerUp.type === 'shield' && '🛡️ SHIELD'}
+              {activePowerUp.type === 'multiplier' && '✨ 5X'}
+            </div>
+          )}
         </div>
         <div className="flex flex-col items-center">
              <div className="text-4xl font-black text-white">{timeLeft}</div>
@@ -278,12 +371,33 @@ const Game: React.FC<GameProps> = ({ onGameOver, difficulty, mode, soundEnabled 
         )}
 
         {currentNumber && !isPaused && (
-            <div
+            <div className="relative z-20">
+              {/* Golden Number Glow Effect */}
+              {currentNumber.isGolden && (
+                <div className="absolute inset-0 blur-3xl bg-yellow-400 opacity-50 animate-pulse" />
+              )}
+              {/* Power-Up Glow Effect */}
+              {currentNumber.isPowerUp && (
+                <div className="absolute inset-0 blur-3xl bg-purple-500 opacity-50 animate-pulse" />
+              )}
+
+              <div
                 key={currentNumber.id}
-                className={`relative z-20 text-[12rem] md:text-[16rem] leading-none font-black game-font animate-pop
-                ${currentNumber.value === 6 || currentNumber.value === 7 ? 'text-neon-yellow drop-shadow-[0_0_35px_rgba(235,255,0,0.5)]' : 'text-white/80'}`}
-            >
+                className={`relative text-[12rem] md:text-[16rem] leading-none font-black game-font animate-pop
+                ${currentNumber.isGolden ? 'text-yellow-400 drop-shadow-[0_0_50px_rgba(250,204,21,0.9)] animate-pulse' :
+                  currentNumber.isPowerUp ? 'text-purple-400 drop-shadow-[0_0_50px_rgba(192,132,252,0.9)]' :
+                  currentNumber.value === 6 || currentNumber.value === 7 ? 'text-neon-yellow drop-shadow-[0_0_35px_rgba(235,255,0,0.5)]' :
+                  'text-white/80'}`}
+              >
                 {currentNumber.value}
+                {/* Special indicators */}
+                {currentNumber.isGolden && (
+                  <span className="absolute -top-8 right-0 text-2xl animate-bounce">✨</span>
+                )}
+                {currentNumber.isPowerUp && (
+                  <span className="absolute -top-8 right-0 text-2xl animate-spin">⚡</span>
+                )}
+              </div>
             </div>
         )}
 
