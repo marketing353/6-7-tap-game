@@ -1,4 +1,4 @@
-import { Achievement, PlayerProgress, GameStats } from '../types';
+import { Achievement, PlayerProgress, GameStats, Theme } from '../types';
 
 const PROGRESS_KEY = '6-7-tap-progress';
 
@@ -52,7 +52,18 @@ export const getPlayerProgress = (): PlayerProgress => {
 
       return {
         ...progress,
-        achievements: [...progress.achievements, ...newAchievements]
+        achievements: [...progress.achievements, ...newAchievements],
+        // Add defaults for new economy fields if they don't exist
+        coins: progress.coins ?? 0,
+        inventory: progress.inventory ?? {
+          unlockedThemes: [Theme.NEON],
+          powerUpBoosts: 0,
+          shields: 0,
+          doubleTapCards: 0
+        },
+        prestigeLevel: progress.prestigeLevel ?? 0,
+        totalCoinsEarned: progress.totalCoinsEarned ?? 0,
+        lastSpinDate: progress.lastSpinDate ?? ''
       };
     }
   } catch (error) {
@@ -69,7 +80,17 @@ export const getPlayerProgress = (): PlayerProgress => {
     bestCombo: 0,
     bestScore: 0,
     powerUpsCollected: 0,
-    goldenNumbersHit: 0
+    goldenNumbersHit: 0,
+    coins: 0,
+    inventory: {
+      unlockedThemes: [Theme.NEON],
+      powerUpBoosts: 0,
+      shields: 0,
+      doubleTapCards: 0
+    },
+    prestigeLevel: 0,
+    totalCoinsEarned: 0,
+    lastSpinDate: ''
   };
 };
 
@@ -85,7 +106,7 @@ export const updateProgressWithGameStats = (
   stats: GameStats,
   goldenNumbers: number = 0,
   powerUps: number = 0
-): { progress: PlayerProgress; newAchievements: Achievement[] } => {
+): { progress: PlayerProgress; newAchievements: Achievement[]; coinsEarned: number } => {
   const progress = getPlayerProgress();
   const newlyUnlocked: Achievement[] = [];
 
@@ -103,6 +124,13 @@ export const updateProgressWithGameStats = (
     progress.lastPlayedDate = today;
   }
 
+  // Calculate coins earned
+  const baseCoins = Math.floor(stats.score / 100); // 100 pts = 1 coin
+  const comboBonus = Math.floor(stats.maxCombo / 10) * 5; // Bonus for high combos
+  const goldenBonus = goldenNumbers * 10; // 10 coins per golden number
+  const accuracyBonus = stats.accuracy >= 0.9 ? 50 : 0; // Bonus for 90%+ accuracy
+  const coinsEarned = baseCoins + comboBonus + goldenBonus + accuracyBonus;
+
   // Update stats
   progress.totalScore += stats.score;
   progress.totalGamesPlayed += 1;
@@ -111,6 +139,8 @@ export const updateProgressWithGameStats = (
   progress.bestScore = Math.max(progress.bestScore, stats.score);
   progress.goldenNumbersHit += goldenNumbers;
   progress.powerUpsCollected += powerUps;
+  progress.coins += coinsEarned;
+  progress.totalCoinsEarned += coinsEarned;
 
   // Check achievements
   progress.achievements = progress.achievements.map(achievement => {
@@ -244,5 +274,5 @@ export const updateProgressWithGameStats = (
 
   savePlayerProgress(progress);
 
-  return { progress, newAchievements: newlyUnlocked };
+  return { progress, newAchievements: newlyUnlocked, coinsEarned };
 };

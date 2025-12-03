@@ -5,7 +5,9 @@ export enum GameState {
   SETTINGS = 'SETTINGS',
   TUTORIAL = 'TUTORIAL',
   ACHIEVEMENTS = 'ACHIEVEMENTS',
-  STATS = 'STATS'
+  STATS = 'STATS',
+  SHOP = 'SHOP',
+  DAILY_SPIN = 'DAILY_SPIN'
 }
 
 export enum Difficulty {
@@ -76,6 +78,16 @@ export interface PlayerProgress {
   bestScore: number;
   powerUpsCollected: number;
   goldenNumbersHit: number;
+  coins: number;
+  inventory: {
+    unlockedThemes: Theme[];
+    powerUpBoosts: number;
+    shields: number;
+    doubleTapCards: number;
+  };
+  prestigeLevel: number;
+  totalCoinsEarned: number;
+  lastSpinDate: string;
 }
 
 export interface PowerUp {
@@ -88,4 +100,34 @@ export interface SpecialNumber extends NumberItem {
   isGolden?: boolean;
   isPowerUp?: boolean;
   powerUpType?: PowerUp['type'];
+}
+
+export interface ShopItem {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  cost: number;
+  type: 'theme' | 'consumable' | 'permanent';
+  value?: any;
+}
+
+export interface DailyReward {
+  type: 'coins' | 'powerup' | 'theme';
+  value: number | string;
+  rarity: 'common' | 'rare' | 'legendary';
+  icon: string;
+  message: string;
+}
+
+export interface WagerChallenge {
+  id: string;
+  name: string;
+  description: string;
+  entryFee: number;
+  reward: number;
+  requirement: {
+    type: 'score' | 'combo' | 'accuracy';
+    target: number;
+  };
 }

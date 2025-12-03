@@ -8,6 +8,7 @@ interface MenuProps {
   onTutorial: () => void;
   onAchievements: () => void;
   onStats: () => void;
+  onShop: () => void;
   highScore: number;
   difficulty: Difficulty;
   soundEnabled: boolean;
@@ -20,6 +21,7 @@ const Menu: React.FC<MenuProps> = ({
   onTutorial,
   onAchievements,
   onStats,
+  onShop,
   highScore,
   difficulty,
   soundEnabled,
@@ -52,14 +54,18 @@ const Menu: React.FC<MenuProps> = ({
         </div>
 
         <div className="py-4 space-y-3">
-          <div className="flex gap-3">
-            <div className="flex-1 px-4 py-3 border-2 border-gray-800 rounded-xl bg-gray-900/50 backdrop-blur-sm">
-              <p className="text-gray-400 text-xs uppercase tracking-wider">High Score</p>
-              <p className="text-2xl font-bold text-white">{highScore.toLocaleString()}</p>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="px-3 py-3 border-2 border-gray-800 rounded-xl bg-gray-900/50 backdrop-blur-sm text-center">
+              <p className="text-gray-400 text-xs uppercase tracking-wider">Score</p>
+              <p className="text-xl font-bold text-white">{highScore.toLocaleString()}</p>
             </div>
-            <div className="flex-1 px-4 py-3 border-2 border-gray-800 rounded-xl bg-gray-900/50 backdrop-blur-sm">
+            <div className="px-3 py-3 border-2 border-gray-800 rounded-xl bg-gray-900/50 backdrop-blur-sm text-center">
               <p className="text-gray-400 text-xs uppercase tracking-wider">Streak</p>
-              <p className="text-2xl font-bold text-neon-pink">{playerProgress.dailyStreak} 🔥</p>
+              <p className="text-xl font-bold text-neon-pink">{playerProgress.dailyStreak} 🔥</p>
+            </div>
+            <div className="px-3 py-3 border-2 border-yellow-700/50 rounded-xl bg-yellow-900/20 backdrop-blur-sm text-center">
+              <p className="text-yellow-300 text-xs uppercase tracking-wider">Coins</p>
+              <p className="text-xl font-bold text-yellow-400">{playerProgress.coins} 💰</p>
             </div>
           </div>
           <div className="text-xs text-gray-500">
@@ -83,6 +89,14 @@ const Menu: React.FC<MenuProps> = ({
             className="w-full px-8 py-4 bg-neon-cyan/20 border-2 border-neon-cyan text-neon-cyan font-bold text-lg rounded-full transition-all duration-200 hover:bg-neon-cyan/30 hover:scale-105 active:scale-95"
           >
             ♾️ PRACTICE MODE
+          </button>
+
+          {/* Shop Button - Prominent */}
+          <button
+            onClick={onShop}
+            className="w-full px-8 py-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-white font-black text-xl rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-yellow-500/30"
+          >
+            🛒 SHOP
           </button>
 
           <div className="grid grid-cols-2 gap-2">

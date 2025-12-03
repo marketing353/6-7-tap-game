@@ -7,9 +7,10 @@ interface ResultsProps {
   stats: GameStats;
   onRestart: () => void;
   onHome: () => void;
+  coinsEarned: number;
 }
 
-const Results: React.FC<ResultsProps> = ({ stats, onRestart, onHome }) => {
+const Results: React.FC<ResultsProps> = ({ stats, onRestart, onHome, coinsEarned }) => {
   const [commentary, setCommentary] = useState<AICommentary | null>(null);
   const [loading, setLoading] = useState(true);
   const [shareMessage, setShareMessage] = useState<string>('');
@@ -96,6 +97,20 @@ const Results: React.FC<ResultsProps> = ({ stats, onRestart, onHome }) => {
                     <p className="font-bold">{Math.round(stats.accuracy * 100)}%</p>
                 </div>
             </div>
+        </div>
+
+        {/* Coins Earned */}
+        <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/50 p-6 rounded-2xl flex items-center justify-between shadow-lg shadow-yellow-500/20">
+          <div className="flex items-center gap-4">
+            <div className="text-6xl animate-bounce">💰</div>
+            <div>
+              <p className="text-yellow-200 text-xs font-bold uppercase tracking-wider">Coins Earned</p>
+              <p className="text-4xl font-black text-yellow-400">+{coinsEarned}</p>
+              <p className="text-xs text-yellow-200/70 mt-1">
+                Keep playing to unlock themes & power-ups!
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Feedback Section */}
