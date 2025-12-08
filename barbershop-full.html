@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en-CA" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>King Style Barbershop | Premium Haircuts & Grooming in Oakville, ON</title>
+    <meta name="description" content="Experience luxury grooming at King Style Barbershop in Oakville. Expert barbers offering precision haircuts, clean fades, beard trims, and hot towel shaves.">
+    <meta name="theme-color" content="#C5A059">
+
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- FIXED: Using development builds to see errors -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-gold': '#C5A059',
+                        'brand-gold-hover': '#b08d4b',
+                        'brand-dark': '#111111',
+                        'brand-gray': '#1A1A1A',
+                        'brand-light': '#FDFBF7',
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'fade-in': 'fadeIn 3s ease-out forwards',
+                        'zoom-slow': 'zoomSlow 30s linear infinite',
+                        'pulse-slow': 'pulse 4s infinite',
+                        'drop-in': 'dropIn 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(80px) scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+                        },
+                        dropIn: {
+                            '0%': { opacity: '0', transform: 'translateY(-80px) scale(1.1)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        zoomSlow: {
+                            '0%': { transform: 'scale(1)' },
+                            '100%': { transform: 'scale(1.1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        section[id] {
+            scroll-margin-top: 80px;
+        }
+        #dilvior-app-root {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="dilvior-app-root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Configuration
+        const CONFIG = {
+            name: "King Style Barbershop",
+            address: "1011 Upper Middle Rd E, Oakville, ON L6H 4L2",
+            phone: "(905) 287-9191",
+            phoneLink: "tel:+19052879191",
+            timingsFull: "Open Daily: 10:00 AM - 9:00 PM",
+            mapLink: "https://share.google/q8ZtztF7BmXc4RD3m",
+            reviewCount: "1,028",
+            rating: "5.0",
+            socialLinks: {
+                instagram: "https://www.instagram.com/kingstylebarbershop",
+                facebook: "https://www.facebook.com/kingstylebarbershop",
+                tiktok: "https://www.tiktok.com/@kingstylebarbershop",
+                youtube: "https://www.youtube.com/@kingstylebarbershop"
+            }
+        };
+
+        // Icons
+        const Icons = {
+            Calendar: () => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            ),
+            Phone: () => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+            ),
+            MapPin: () => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+            ),
+            Menu: () => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            ),
+            X: () => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            )
+        };
+
+        // Components
+        const Button = ({ children, primary, className = "", onClick, href }) => {
+            const Component = href ? 'a' : 'button';
+            const isExternal = href && href.startsWith('http');
+            return React.createElement(Component, {
+                href: href,
+                onClick: onClick,
+                target: isExternal ? "_blank" : undefined,
+                rel: isExternal ? "noopener noreferrer" : undefined,
+                className: `inline-block text-center px-8 py-4 md:px-5 md:py-3 text-sm md:text-xs font-bold uppercase tracking-[0.2em] rounded transition-all duration-300 ${
+                    primary
+                    ? 'bg-brand-gold text-white hover:bg-white hover:text-brand-dark border border-transparent hover:border-brand-gold'
+                    : 'bg-white text-brand-dark border border-brand-gold hover:bg-brand-gold hover:text-white'
+                } ${className}`
+            }, children);
+        };
+
+        const Navbar = () => {
+            const [scrolled, setScrolled] = useState(false);
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll, { passive: true });
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            return (
+                <>
+                    <nav className={`fixed top-0 left-0 w-full z-50 text-white transition-all duration-500 flex justify-between items-center px-4 md:px-12 ${
+                        scrolled ? 'bg-black/95 backdrop-blur-md py-4 shadow-2xl' : 'bg-gradient-to-b from-black/80 to-transparent py-6'
+                    }`}>
+                        <a href="#" className="text-xl md:text-3xl font-extrabold tracking-widest uppercase text-brand-gold">
+                            King Style
+                        </a>
+
+                        <div className="hidden md:flex gap-10 text-base font-bold">
+                            <a href="#" className="hover:text-brand-gold transition-colors">Home</a>
+                            <a href="#services" className="hover:text-brand-gold transition-colors">Services</a>
+                            <a href="#about" className="hover:text-brand-gold transition-colors">About</a>
+                            <a href="#location" className="hover:text-brand-gold transition-colors">Location</a>
+                        </div>
+
+                        <div className="hidden md:block">
+                            <a href={CONFIG.mapLink} target="_blank" rel="noopener noreferrer" className="bg-brand-gold text-white px-8 py-3 text-sm font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded inline-block">
+                                Book Now
+                            </a>
+                        </div>
+
+                        <button className="md:hidden text-white z-50" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                            {mobileMenuOpen ? <Icons.X /> : <Icons.Menu />}
+                        </button>
+                    </nav>
+
+                    <div className={`fixed inset-0 bg-black/95 z-40 flex flex-col items-center justify-center transition-all duration-300 ${
+                        mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                    }`}>
+                        <nav className="flex flex-col items-center gap-10 text-3xl font-extrabold uppercase text-white">
+                            <a href="#" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-gold transition-colors">Home</a>
+                            <a href="#services" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-gold transition-colors">Services</a>
+                            <a href="#about" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-gold transition-colors">About</a>
+                            <a href="#location" onClick={() => setMobileMenuOpen(false)} className="hover:text-brand-gold transition-colors">Location</a>
+                        </nav>
+                    </div>
+                </>
+            );
+        };
+
+        const Hero = () => (
+            <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                    <img
+                        src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop"
+                        alt="Barbershop interior"
+                        className="w-full h-full object-cover animate-zoom-slow"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30"></div>
+                </div>
+
+                <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto mt-16">
+                    <div className="animate-drop-in">
+                        <h1 className="text-3xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-wider mb-6 leading-none">
+                            Premium Barbershop <br/><span className="text-brand-gold">in Oakville</span>
+                        </h1>
+                    </div>
+                    <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
+                        <p className="text-base md:text-2xl text-gray-100 mb-10 max-w-3xl mx-auto font-medium leading-relaxed">
+                            Luxury grooming for the modern gentleman. Expert haircuts, clean fades, beard trims, and hot towel shaves.
+                        </p>
+                    </div>
+                    <div className="flex flex-col justify-center items-center gap-4 animate-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
+                        <Button primary={true} href={CONFIG.mapLink}>Book Now</Button>
+                        <Button primary={false} href="#services">Our Services</Button>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const About = () => (
+            <section id="about" className="py-24 px-4 md:px-12 max-w-7xl mx-auto bg-white">
+                <h2 className="text-2xl md:text-5xl font-extrabold uppercase mb-8 tracking-wide text-brand-dark">
+                    About King Style Barbershop
+                </h2>
+                <div className="text-gray-800 text-sm md:text-xl font-medium leading-loose space-y-6">
+                    <p>
+                        At <strong>King Style Barbershop</strong>, we don't just cut hair — we craft confidence.
+                        Every visit is more than a service; it's an experience built on precision, pride, and professionalism.
+                    </p>
+                    <p>
+                        Conveniently located at <strong>{CONFIG.address}</strong>, we're easily accessible for clients
+                        across Oakville, Burlington, Mississauga, and Milton.
+                    </p>
+                </div>
+
+                <address className="mt-12 space-y-6 font-bold text-base md:text-xl text-brand-dark not-italic">
+                    <div className="flex items-center gap-5">
+                        <div className="bg-brand-light p-3 rounded-full text-brand-gold"><Icons.Phone /></div>
+                        <a href={CONFIG.phoneLink} className="hover:text-brand-gold transition-colors">Call {CONFIG.phone}</a>
+                    </div>
+                    <div className="flex items-center gap-5">
+                        <div className="bg-brand-light p-3 rounded-full text-brand-gold"><Icons.MapPin /></div>
+                        <a href={CONFIG.mapLink} target="_blank" rel="noopener noreferrer" className="hover:text-brand-gold transition-colors">
+                            Get Directions
+                        </a>
+                    </div>
+                </address>
+            </section>
+        );
+
+        const ServiceItem = ({ title, price, description }) => (
+            <article className="mb-4 p-6 rounded-lg transition-all duration-500 hover:bg-white hover:shadow-2xl">
+                <div className="flex justify-between items-end mb-3">
+                    <h3 className="text-lg md:text-xl font-black uppercase tracking-wide text-brand-dark">{title}</h3>
+                    <span className="text-lg md:text-3xl font-black text-brand-dark">${price}</span>
+                </div>
+                {description && <p className="text-sm md:text-lg text-gray-800 leading-relaxed font-semibold">{description}</p>}
+            </article>
+        );
+
+        const Services = () => {
+            const services = [
+                { title: "Haircut", price: "30", desc: "A precise, tailored haircut designed to match your personal style." },
+                { title: "Beard Trim & Line Up", price: "25", desc: "Sculpted and defined beard grooming." },
+                { title: "Hot Towel Shave", price: "25", desc: "Relaxing hot towel treatment with straight razor shave." },
+                { title: "Student Haircut", price: "30", desc: "Clean and stylish cut for students with valid ID." },
+                { title: "Senior Haircut", price: "25", desc: "Classic, clean styles for seniors." },
+                { title: "Kid Haircut", price: "25", desc: "Haircuts for children under 10." },
+            ];
+
+            return (
+                <section id="services" className="py-24 bg-brand-light">
+                    <div className="max-w-7xl mx-auto px-4 md:px-12">
+                        <div className="text-center mb-20">
+                            <h2 className="text-2xl md:text-6xl font-extrabold uppercase mb-6 text-brand-dark">Our Services</h2>
+                            <div className="w-32 h-2 bg-brand-gold mx-auto mb-8"></div>
+                            <p className="text-sm md:text-lg text-gray-800 max-w-3xl mx-auto leading-relaxed font-medium">
+                                Experience premium grooming at King Style Barbershop in Oakville.
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                            {services.map((service, i) => (
+                                <ServiceItem key={i} title={service.title} price={service.price} description={service.desc} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Location = () => (
+            <section id="location" className="py-24 px-4 md:px-12 max-w-7xl mx-auto bg-white">
+                <div className="grid md:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <h2 className="text-2xl md:text-5xl font-black uppercase mb-8 text-brand-dark">Visit Our Location</h2>
+                        <p className="text-gray-700 mb-8 text-sm md:text-lg leading-relaxed font-medium">
+                            Find King Style Barbershop at <strong>{CONFIG.address}</strong>.
+                            We're conveniently located in Oakville with easy parking.
+                        </p>
+
+                        <address className="space-y-8 font-bold text-xl text-brand-dark not-italic">
+                            <div className="flex items-start gap-6">
+                                <div className="bg-brand-light p-4 rounded-full text-brand-gold"><Icons.Phone /></div>
+                                <div>
+                                    <span className="block text-sm text-gray-400 mb-1">Call Us</span>
+                                    <a href={CONFIG.phoneLink} className="hover:text-brand-gold transition-colors">{CONFIG.phone}</a>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-6">
+                                <div className="bg-brand-light p-4 rounded-full text-brand-gold"><Icons.MapPin /></div>
+                                <div>
+                                    <span className="block text-sm text-gray-400 mb-1">Address</span>
+                                    <span className="text-lg leading-snug">{CONFIG.address}</span>
+                                </div>
+                            </div>
+                        </address>
+                    </div>
+
+                    <div className="w-full h-[500px] bg-gray-200 rounded-xl overflow-hidden shadow-2xl">
+                        <iframe
+                            src="https://maps.google.com/maps?q=1011%20Upper%20Middle%20Rd%20E,%20Oakville,%20ON%20L6H%204L2&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            loading="lazy"
+                            title="King Style Barbershop location map">
+                        </iframe>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Footer = () => (
+            <footer className="bg-black text-white py-24 px-6">
+                <div className="max-w-7xl mx-auto text-center">
+                    <div className="text-3xl font-black text-brand-gold mb-8">
+                        King Style Barbershop
+                    </div>
+                    <div className="text-gray-400">
+                        <p className="mb-4">{CONFIG.address}</p>
+                        <p className="mb-4"><a href={CONFIG.phoneLink} className="hover:text-brand-gold">{CONFIG.phone}</a></p>
+                        <p className="mb-8">{CONFIG.timingsFull}</p>
+                    </div>
+                    <div className="text-sm text-gray-600 mt-12">
+                        © {new Date().getFullYear()} King Style Barbershop Inc. All rights reserved.
+                    </div>
+                </div>
+            </footer>
+        );
+
+        const App = () => {
+            return (
+                <div className="font-sans antialiased bg-white">
+                    <Navbar />
+                    <main>
+                        <Hero />
+                        <About />
+                        <Services />
+                        <Location />
+                    </main>
+                    <Footer />
+                </div>
+            );
+        };
+
+        // Render with error handling
+        try {
+            const root = ReactDOM.createRoot(document.getElementById('dilvior-app-root'));
+            root.render(<App />);
+            console.log('✅ React app rendered successfully!');
+        } catch (error) {
+            console.error('❌ Error rendering React app:', error);
+            document.getElementById('dilvior-app-root').innerHTML = `
+                <div style="padding: 40px; font-family: sans-serif; max-width: 800px; margin: 0 auto;">
+                    <h1 style="color: #C5A059; font-size: 48px; margin-bottom: 20px;">King Style Barbershop</h1>
+                    <div style="background: #fee; border-left: 4px solid red; padding: 20px; margin: 20px 0;">
+                        <h2 style="color: red; margin: 0 0 10px 0;">Error Loading Page</h2>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p style="font-size: 14px; color: #666;">Check the browser console (F12) for more details.</p>
+                    </div>
+                    <div style="background: #f5f5f5; padding: 20px; border-radius: 8px;">
+                        <h3>Contact Information:</h3>
+                        <p><strong>Address:</strong> ${CONFIG.address}</p>
+                        <p><strong>Phone:</strong> <a href="${CONFIG.phoneLink}">${CONFIG.phone}</a></p>
+                        <p><strong>Hours:</strong> ${CONFIG.timingsFull}</p>
+                        <p style="margin-top: 20px;">
+                            <a href="${CONFIG.mapLink}" style="background: #C5A059; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                                Book Appointment
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
